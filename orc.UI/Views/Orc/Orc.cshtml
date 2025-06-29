@@ -1,0 +1,52 @@
+﻿
+@{
+    // ViewData["Title"] = "OCR";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>OCR</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script>
+        function validateFileInput(input) {
+            const file = input.files[0];
+            const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png'];
+            const errorDiv = document.getElementById('fileError');
+            errorDiv.textContent = '';
+
+            if (file && !allowedTypes.includes(file.type)) {
+                errorDiv.textContent = 'Only PDF or image files (JPG, PNG) are allowed.';
+                input.value = '';
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="mb-4">Upload Information</h2>
+        <form asp-controller="Home" asp-action="Upload" method="post" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label for="firstName" class="form-label">First Name</label>
+                <input type="text" name="FirstName" class="form-control" id="firstName" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="lastName" class="form-label">Last Name</label>
+                <input type="text" name="LastName" class="form-control" id="lastName" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="file" class="form-label">Upload File (PDF or Image)</label>
+                <input type="file" name="File" class="form-control" id="file" onchange="validateFileInput(this)" required>
+                <div id="fileError" class="text-danger mt-1"></div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    </div>
+</body>
+</html>
+
