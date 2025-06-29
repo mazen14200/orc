@@ -1,0 +1,6 @@
+@orc.UI_HostAddress = http://localhost:5169
+
+GET {{orc.UI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
