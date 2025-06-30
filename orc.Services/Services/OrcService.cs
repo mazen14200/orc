@@ -86,6 +86,14 @@ namespace orc.Services.Services
                     return false;
                 }
             }
+            if (city > 4 && city <11)
+            {
+                return false;
+            }
+            if (city > 35 && city < 88)
+            {
+                return false;
+            }
             return true;
         }
         
