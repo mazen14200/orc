@@ -1,16 +1,30 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
-using System.IO;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using orc.core.Interfaces;
+using orc.core.Models;
+using orc.UI.DTO;
 using System;
+using System.IO;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Tesseract;
+using static System.Net.Mime.MediaTypeNames;
 
 
 namespace orc.UI.Controllers
 {
+
     [Route("[controller]")]
     public class OrcController : Controller
     {
+        private readonly IBaseRepository<National> _nationalTable;
+        private readonly IOrcService _orc;
+
+        public OrcController(IBaseRepository<National> nationalTable, IOrcService orc)
+        {
+            _nationalTable = nationalTable;
+            _orc = orc;
+        }
         [HttpGet("Orc")]
         public IActionResult Orc()
         {
@@ -19,6 +33,11 @@ namespace orc.UI.Controllers
         [HttpPost("Orc")]
         public async Task<IActionResult> Orc(string firstName, string lastName, IFormFile file)
         {
+            if (!ModelState.IsValid)
+            {
+                ViewBag.TextValue_View = "من فضلك اكمل البيانات";
+                return View();
+            }
             if (file != null && file.Length > 0)
             {
                 var filePath = Path.Combine("wwwroot/uploads", Path.GetFileName(file.FileName));
@@ -32,10 +51,41 @@ namespace orc.UI.Controllers
                 string imagePath = filePath;
                 string tessDataPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "tessdata");
 
-                string extractedText = ExtractTextFromImage(imagePath, tessDataPath);
+                string extractedText = await _orc.ExtractTextFromImage(imagePath, tessDataPath);
                 Console.WriteLine(extractedText);
+                //string text_withoutSpaces = extractedText.Replace(" ", "").Replace("\n", "").Replace("\t", "");
+                string text_withoutSpaces = Regex.Replace(extractedText, @"[^\d٠-٩]", "");
 
-                ViewBag.Message = "File uploaded successfully!";
+                bool isValid = false;
+                bool isNumber = await _orc.CheckIfDataNumbers(text_withoutSpaces);
+                if (isNumber)
+                {
+                    isValid = await _orc.CheckIfNationalNumber(text_withoutSpaces);
+                }
+
+                ViewBag.TextValue_View = text_withoutSpaces;
+
+                if (isValid) {
+                    Console.WriteLine("OK it's a National Number");
+                    ViewBag.Message = "OK it's a National Number!";
+                    var allNationals = _nationalTable.GetAll();
+                    var lastSerial = allNationals?.LastOrDefault()?.Id??"0";
+                    National nationalSingle = new National();
+                    nationalSingle.Id = (int.Parse(lastSerial) + 1).ToString("00000");
+                    nationalSingle.FirstName = firstName;
+                    nationalSingle.LastName = lastName;
+                    nationalSingle.NationalNumber = text_withoutSpaces;
+                    _nationalTable.Add(nationalSingle);
+                    _nationalTable.Complete();
+
+                }
+                else
+                {
+                    Console.WriteLine("No, it's Not a National Number");
+                    ViewBag.Message = "No, it's Not a National Number!";
+
+                }
+
             }
             else
             {
@@ -46,12 +96,6 @@ namespace orc.UI.Controllers
             return View();
         }
 
-        static string ExtractTextFromImage(string imagePath, string tessDataPath)
-        {
-            using var engine = new TesseractEngine(tessDataPath, "eng", EngineMode.Default);
-            using var img = Pix.LoadFromFile(imagePath);
-            using var page = engine.Process(img);
-            return page.GetText();
-        }
+
     }
 }

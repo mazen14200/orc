@@ -5,7 +5,7 @@ VisualStudioVersion = 17.14.36221.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "orc.core", "orc.core\orc.core.csproj", "{8B40692A-070F-4303-801E-63A0456D82EB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "orc.Repository", "orc.Repository\orc.Repository.csproj", "{05CE8028-6965-86E3-6A0A-9B6C26FC894F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "orc.Infrastructure", "orc.Repository\orc.Infrastructure.csproj", "{05CE8028-6965-86E3-6A0A-9B6C26FC894F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "orc.Services", "orc.Services\orc.Services.csproj", "{750FBC09-033E-7744-8215-5D4FA348C1A2}"
 EndProject

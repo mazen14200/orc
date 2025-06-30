@@ -1,4 +1,6 @@
-﻿
+﻿@using orc.UI.DTO;
+@model NationalDTO
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @{
     // ViewData["Title"] = "OCR";
 }
@@ -27,15 +29,15 @@
 <body>
     <div class="container mt-5">
         <h2 class="mb-4">Upload Information</h2>
-        <form asp-controller="Home" asp-action="Upload" method="post" enctype="multipart/form-data">
+        <form asp-controller="Orc" asp-action="Orc" method="post" enctype="multipart/form-data">
             <div class="mb-3">
-                <label for="firstName" class="form-label">First Name</label>
-                <input type="text" name="FirstName" class="form-control" id="firstName" required>
+                <label for="FirstName" class="form-label">First Name</label>
+                <input type="text" name="FirstName" class="form-control" asp-for="FirstName" required>
             </div>
 
             <div class="mb-3">
-                <label for="lastName" class="form-label">Last Name</label>
-                <input type="text" name="LastName" class="form-control" id="lastName" required>
+                <label for="LastName" class="form-label">Last Name</label>
+                <input type="text" name="LastName" class="form-control" asp-for="LastName" required>
             </div>
 
             <div class="mb-3">
@@ -45,6 +47,12 @@
             </div>
 
             <button type="submit" class="btn btn-primary">Submit</button>
+
+            <div class="mb-3">
+                <label for="TextValue_View" class="form-label">@ViewBag.TextValue_View</label>
+                <label for="Message" class="form-label" style="color:red">@ViewBag.Message</label>
+            </div>
+
         </form>
     </div>
 </body>

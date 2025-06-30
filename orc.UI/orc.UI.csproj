@@ -24,4 +24,10 @@
     <Folder Include="wwwroot\uploads\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\orc.core\orc.core.csproj" />
+    <ProjectReference Include="..\orc.Repository\orc.Infrastructure.csproj" />
+    <ProjectReference Include="..\orc.Services\orc.Services.csproj" />
+  </ItemGroup>
+
 </Project>
