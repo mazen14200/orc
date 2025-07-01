@@ -13,6 +13,8 @@ using SixLabors.ImageSharp.Processing;
 //using System.Drawing;
 using Tesseract;
 using static System.Net.Mime.MediaTypeNames;
+using SixLabors.ImageSharp.Formats.Png;
+using Image = SixLabors.ImageSharp.Image; // أو .Jpeg حسب التنسيق
 
 
 namespace orc.UI.Controllers
@@ -44,15 +46,26 @@ namespace orc.UI.Controllers
             }
             if (file != null && file.Length > 0)
             {
-                var filePath = Path.Combine("wwwroot/uploads", Path.GetFileName(file.FileName));
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await file.CopyToAsync(stream);
-                }
+                var uploadsFolder = Path.Combine("wwwroot", "uploads");
+                Directory.CreateDirectory(uploadsFolder);
+
+                var fileName = Path.GetFileNameWithoutExtension(file.FileName);
+                var fileExt = Path.GetExtension(file.FileName);
+                var grayFileName = $"{fileName}_gray{fileExt}";
+                var savePath = Path.Combine(uploadsFolder, grayFileName);
+
+                using var image = await Image.LoadAsync(file.OpenReadStream());
+
+                // تحويل إلى تدرج الرمادي
+                image.Mutate(x => x.Grayscale());
+
+                // حفظ الصورة بصيغة PNG أو JPEG حسب الامتداد
+                await image.SaveAsync(savePath); // تلقائيًا يحدد التنسيق حسب الامتداد
+
                 Console.WriteLine("النص المستخرج:");
 
                 //string imagePath = "D:\\mazen\\orc\\orc.UI\\wwwroot\\uploads\\ITFdiag1.png"; // مسار الصورة
-                string imagePath = filePath;
+                string imagePath = savePath;
                 string tessDataPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "tessdata");
                 string extractedText = "";
                 if(lang == "ar")
