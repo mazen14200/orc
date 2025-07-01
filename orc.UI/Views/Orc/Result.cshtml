@@ -1,0 +1,57 @@
+﻿@using orc.core.Models
+@model NationalIdData
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <title>البيانات المستخرجة</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', 'Arial', sans-serif;
+            direction: rtl;
+            text-align: right;
+            margin: 30px;
+        }
+
+        .field {
+            margin-bottom: 15px;
+        }
+
+        .label {
+            font-weight: bold;
+            color: #444;
+        }
+
+        .value {
+            background-color: #f3f3f3;
+            padding: 10px;
+            border-radius: 8px;
+            display: inline-block;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <h2>البيانات المستخرجة من البطاقة</h2>
+
+    <div class="field">
+        <div class="label">👤 الاسم:</div>
+        <div class="value">@Model.Name</div>
+    </div>
+
+    <div class="field">
+        <div class="label">🏠 العنوان:</div>
+        <div class="value">@Model.Address</div>
+    </div>
+
+    <div class="field">
+        <div class="label">🏛 المحافظة:</div>
+        <div class="value">@Model.Governorate</div>
+    </div>
+
+  
+</body>
+</html>

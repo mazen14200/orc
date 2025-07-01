@@ -68,6 +68,9 @@ namespace orc.UI.Controllers
                     extractedText = await _orc.ExtractTextFromImage_AsEn(imagePath, tessDataPath);
                 }
                 Console.WriteLine(extractedText);
+                var structuredData = ParseOcrText(extractedText);
+
+                return View("Result", structuredData);
                 //string text_withoutSpaces = extractedText.Replace(" ", "").Replace("\n", "").Replace("\t", "");
                 //string text_withoutSpaces = Regex.Replace(extractedText, @"[^\d٠-٩]", "");
                 string text_withoutSpaces = extractedText;
@@ -79,7 +82,7 @@ namespace orc.UI.Controllers
                     isValid = await _orc.CheckIfNationalNumber(text_withoutSpaces);
                 }
 
-                ViewBag.TextValue_View = text_withoutSpaces;
+                ViewBag.TextValue_View = extractedText;
 
                 if (isValid) {
                     Console.WriteLine("OK it's a National Number");
@@ -112,6 +115,21 @@ namespace orc.UI.Controllers
             return View();
         }
 
+        public NationalIdData ParseOcrText(string ocrText)
+        {
+            var lines = ocrText
+                .Split('\n')
+                .Select(line => line.Trim())
+                .Where(line => !string.IsNullOrWhiteSpace(line))
+                .ToList();
 
+            return new NationalIdData
+            {
+                Name = lines.Count > 1 ? $"{lines[0]} {lines[1]}" : lines.FirstOrDefault(),
+                Address = lines.ElementAtOrDefault(2),
+                Governorate = lines.ElementAtOrDefault(3),
+                Extra = string.Join(" | ", lines.Skip(4)) // Combine remaining info
+            };
+        }
     }
 }
