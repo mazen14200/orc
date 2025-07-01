@@ -18,9 +18,20 @@ namespace orc.Services.Services
         {
             _nationalTable = nationalTable;
         }
-        public async Task<string> ExtractTextFromImage(string imagePath, string tessDataPath)
+        public async Task<string> ExtractTextFromImage_AsEn(string imagePath, string tessDataPath)
         {
             using var engine = new TesseractEngine(tessDataPath, "eng", EngineMode.Default);
+            using var img = Pix.LoadFromFile(imagePath);
+            using var page = engine.Process(img);
+            return page.GetText();
+        }
+        public async Task<string> ExtractTextFromImage_AsAr(string imagePath, string tessDataPath)
+        {
+            //using var engine = new TesseractEngine(tessDataPath, "ara+eng", EngineMode.Default);
+            //engine.SetVariable("tessedit_char_whitelist", "0123456789٠١٢٣٤٥٦٧٨٩");
+
+            using var engine = new TesseractEngine(tessDataPath, "ara", EngineMode.Default);
+            //engine.SetVariable("tessedit_char_whitelist", "٠١٢٣٤٥٦٧٨٩");
             using var img = Pix.LoadFromFile(imagePath);
             using var page = engine.Process(img);
             return page.GetText();

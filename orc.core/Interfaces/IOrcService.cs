@@ -8,7 +8,8 @@ namespace orc.core.Interfaces
 {
     public interface IOrcService
     {
-        public Task<string> ExtractTextFromImage(string imagePath, string tessDataPath);
+        public Task<string> ExtractTextFromImage_AsEn(string imagePath, string tessDataPath);
+        public Task<string> ExtractTextFromImage_AsAr(string imagePath, string tessDataPath);
         public Task<bool> CheckIfDataNumbers(string text_withoutSpaces);
         public Task<bool> CheckIfNationalNumber(string text_withoutSpaces);
         

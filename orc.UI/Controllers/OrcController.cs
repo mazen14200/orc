@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis;
 using orc.core.Interfaces;
 using orc.core.Models;
 using orc.UI.DTO;
@@ -7,6 +8,9 @@ using System;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
+//using System.Drawing;
 using Tesseract;
 using static System.Net.Mime.MediaTypeNames;
 
@@ -31,7 +35,7 @@ namespace orc.UI.Controllers
             return View();
         }
         [HttpPost("Orc")]
-        public async Task<IActionResult> Orc(string firstName, string lastName, IFormFile file)
+        public async Task<IActionResult> Orc(string firstName, string lastName,string lang, IFormFile file)
         {
             if (!ModelState.IsValid)
             {
@@ -50,11 +54,23 @@ namespace orc.UI.Controllers
                 //string imagePath = "D:\\mazen\\orc\\orc.UI\\wwwroot\\uploads\\ITFdiag1.png"; // مسار الصورة
                 string imagePath = filePath;
                 string tessDataPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "tessdata");
-
-                string extractedText = await _orc.ExtractTextFromImage(imagePath, tessDataPath);
+                string extractedText = "";
+                if(lang == "ar")
+                {
+                    // هنا بنحدد الجزء اللي عايزين نقطعه من الصورة:
+                    Rectangle cropRect_Name = new Rectangle(x: 50, y: 100, width: 300, height: 100);
+                    Rectangle cropRect_Address = new Rectangle(x: 50, y: 100, width: 300, height: 100);
+                    Rectangle cropRect_NationalNumber = new Rectangle(x: 50, y: 100, width: 300, height: 100);
+                    extractedText = await _orc.ExtractTextFromImage_AsAr(imagePath, tessDataPath);
+                }
+                else
+                {
+                    extractedText = await _orc.ExtractTextFromImage_AsEn(imagePath, tessDataPath);
+                }
                 Console.WriteLine(extractedText);
                 //string text_withoutSpaces = extractedText.Replace(" ", "").Replace("\n", "").Replace("\t", "");
-                string text_withoutSpaces = Regex.Replace(extractedText, @"[^\d٠-٩]", "");
+                //string text_withoutSpaces = Regex.Replace(extractedText, @"[^\d٠-٩]", "");
+                string text_withoutSpaces = extractedText;
 
                 bool isValid = false;
                 bool isNumber = await _orc.CheckIfDataNumbers(text_withoutSpaces);
