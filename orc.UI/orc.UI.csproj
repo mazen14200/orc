@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="tessdata\" />
     <Folder Include="wwwroot\uploads\" />
   </ItemGroup>
 
@@ -28,6 +29,12 @@
     <ProjectReference Include="..\orc.core\orc.core.csproj" />
     <ProjectReference Include="..\orc.Repository\orc.Infrastructure.csproj" />
     <ProjectReference Include="..\orc.Services\orc.Services.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="tessdata\ara.traineddata">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
