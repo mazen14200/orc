@@ -1,13 +1,19 @@
-﻿@using orc.core.Models
+﻿@using orc.core.Models;
 @model NationalIdData
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
 @{
-    Layout = null;
+    // Layout = null;
 }
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="utf-8" />
     <title>البيانات المستخرجة</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+
     <style>
         body {
             font-family: 'Segoe UI', 'Arial', sans-serif;
@@ -36,22 +42,33 @@
 </head>
 <body>
     <h2>البيانات المستخرجة من البطاقة</h2>
+    <form asp-action="resultSave" asp-controller="Orc" method="post" enctype="multipart/form-data">
 
     <div class="field">
         <div class="label">👤 الاسم:</div>
-        <div class="value">@Model.Name</div>
+            <input type="text" name="Name" asp-for="Name" class="form-control" required>
+        @* <div class="value">@Model.Name</div> *@
     </div>
 
     <div class="field">
         <div class="label">🏠 العنوان:</div>
-        <div class="value">@Model.Address</div>
+            <input type="text" class="form-control" name="Address" asp-for="Address" required />
     </div>
 
     <div class="field">
         <div class="label">🏛 المحافظة:</div>
-        <div class="value">@Model.Governorate</div>
+            <input type="text" class="form-control" name="Governorate" asp-for="Governorate" required />
     </div>
 
-  
+    <div class="field">
+        <div class="label"> رقم قومي:</div>
+            <input type="number" max="39999999999999" class="form-control" name="Id_NationalNumber" asp-for="Id_NationalNumber" required />
+            <div class="value" style="color:red;">@Model.message</div>
+    </div>
+
+    <div class="field">
+        <input type="submit" class="btn btn-primary" value="submit" />
+    </div>
+    </form>
 </body>
 </html>

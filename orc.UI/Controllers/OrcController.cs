@@ -127,8 +127,7 @@ namespace orc.UI.Controllers
                     var lastSerial = allNationals?.LastOrDefault()?.Id??"0";
                     National nationalSingle = new National();
                     nationalSingle.Id = (int.Parse(lastSerial) + 1).ToString("00000");
-                    nationalSingle.FirstName = firstName;
-                    nationalSingle.LastName = lastName;
+                    nationalSingle.Name = firstName+ lastName;
                     nationalSingle.NationalNumber = text_withoutSpaces;
                     _nationalTable.Add(nationalSingle);
                     _nationalTable.Complete();
@@ -149,6 +148,48 @@ namespace orc.UI.Controllers
 
             //return View("UploadResult");
             return View();
+        }
+
+        [HttpPost("resultSave")]
+        public async Task<IActionResult> resultSave(NationalIdData nationalIdData)
+         {
+            if (!ModelState.IsValid)
+            {
+                nationalIdData.message = "الرقم الذي ادخلته غير صحيح";
+                return View("Result",nationalIdData);
+            }
+            else nationalIdData.message = "";
+
+            bool isValid = false;
+            bool isNumber = await _orc.CheckIfDataNumbers(nationalIdData.Id_NationalNumber);
+            if (isNumber)
+            {
+                isValid = await _orc.CheckIfNationalNumber(nationalIdData.Id_NationalNumber);
+            }
+
+            if (isValid)
+            {
+                Console.WriteLine("OK it's a National Number");
+                ViewBag.Message = "OK it's a National Number!";
+                var allNationals = _nationalTable.GetAll();
+                var lastSerial = allNationals?.LastOrDefault()?.Id ?? "0";
+                National nationalSingle = new National();
+                nationalSingle.Id = (int.Parse(lastSerial) + 1).ToString("00000");
+                nationalSingle.Name = nationalIdData.Name;
+                nationalSingle.Address = nationalIdData.Address;
+                nationalSingle.Government = nationalIdData.Governorate;
+                nationalSingle.NationalNumber = nationalIdData.Id_NationalNumber;
+                _nationalTable.Add(nationalSingle);
+                _nationalTable.Complete();
+
+            }
+            else
+            {
+                Console.WriteLine("No, it's Not a National Number");
+                ViewBag.Message = "No, it's Not a National Number!";
+
+            }
+            return View("Orc");
         }
 
         public NationalIdData ParseOcrText(string ocrText)
