@@ -105,5 +105,14 @@ namespace orc.Services.Services
                 return false;
             }
         }
+
+        public async Task<string> FixArabicText(string input)
+        {
+            // عكس السطر
+            var lines = input.Split('\n');
+            var fixedLines = lines.Select(line => new string(line.Reverse().ToArray()));
+
+            return string.Join("\n", fixedLines);
+        }
     }
 }

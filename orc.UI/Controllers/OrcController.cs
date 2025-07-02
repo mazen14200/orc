@@ -15,6 +15,7 @@ using Tesseract;
 using static System.Net.Mime.MediaTypeNames;
 using SixLabors.ImageSharp.Formats.Png;
 using Image = SixLabors.ImageSharp.Image; // أو .Jpeg حسب التنسيق
+using UglyToad.PdfPig;
 
 
 namespace orc.UI.Controllers
@@ -46,6 +47,32 @@ namespace orc.UI.Controllers
             }
             if (file != null && file.Length > 0)
             {
+                if (file.ContentType.ToLower().Contains("pdf")) {
+                    string pdfPath = "D:\\mazen\\word\\tasks/1.pdf"; // أو مسار آخر
+                    string pagedata = $" ";
+                    using (PdfDocument document = PdfDocument.Open(pdfPath))
+                    {
+                        foreach (var page in document.GetPages())
+                        {
+                            string text = page.Text;
+                            Console.OutputEncoding = System.Text.Encoding.UTF8; // لدعم العربية
+
+                            Console.WriteLine($"P{page.Number}:\n{text}\n");
+                            pagedata = pagedata + $"P{page.Number}:\n{text}\n";
+
+                        }
+                    }
+                    if (lang == "ar")
+                    {
+                        string Arab_True = await _orc.FixArabicText(pagedata);
+                        ViewBag.Message = Arab_True;
+                    }
+                    else
+                    {
+                        ViewBag.Message = pagedata;
+                    }
+                    return View();
+                }
                 var uploadsFolder = Path.Combine("wwwroot", "uploads");
                 Directory.CreateDirectory(uploadsFolder);
 
@@ -155,7 +182,7 @@ namespace orc.UI.Controllers
          {
             if (!ModelState.IsValid)
             {
-                nationalIdData.message = "الرقم الذي ادخلته غير صحيح";
+                nationalIdData.message = "The Number which you Entered is Wrong";
                 return View("Result",nationalIdData);
             }
             else nationalIdData.message = "";
@@ -181,15 +208,17 @@ namespace orc.UI.Controllers
                 nationalSingle.NationalNumber = nationalIdData.Id_NationalNumber;
                 _nationalTable.Add(nationalSingle);
                 _nationalTable.Complete();
-
+                return View("Orc");
             }
             else
             {
-                Console.WriteLine("No, it's Not a National Number");
-                ViewBag.Message = "No, it's Not a National Number!";
+                //Console.WriteLine("No, it's Not a National Number");
+                //ViewBag.Message = "No, it's Not a National Number!";
+                nationalIdData.message = "The Number which you Entered is Wrong";
+                return View("Result", nationalIdData);
 
             }
-            return View("Orc");
+
         }
 
         public NationalIdData ParseOcrText(string ocrText)

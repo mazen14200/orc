@@ -13,6 +13,8 @@ namespace orc.core.Interfaces
         public Task<string> ExtractTextFromImage_AsAr(string imagePath, string tessDataPath);
         public Task<bool> CheckIfDataNumbers(string text_withoutSpaces);
         public Task<bool> CheckIfNationalNumber(string text_withoutSpaces);
-        
+        public Task<string> FixArabicText(string input);
+
+
     }
 }
