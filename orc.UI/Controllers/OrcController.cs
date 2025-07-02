@@ -56,10 +56,33 @@ namespace orc.UI.Controllers
 
                 using var image = await Image.LoadAsync(file.OpenReadStream());
 
-                // تحويل إلى تدرج الرمادي
-                image.Mutate(x => x.Grayscale());
+                //// تحويل إلى تدرج الرمادي
+                //image.Mutate(x => x.Grayscale());
 
-                // حفظ الصورة بصيغة PNG أو JPEG حسب الامتداد
+                //// حفظ الصورة بصيغة PNG أو JPEG حسب الامتداد
+                //await image.SaveAsync(savePath); // تلقائيًا يحدد التنسيق حسب الامتداد
+
+                // الحصول على الأبعاد
+                int width_ignore = Convert.ToInt16(image.Width*0.31);
+                int width_Cut = Convert.ToInt16(image.Width * 0.69);
+                int height_ignore = Convert.ToInt16(image.Height*0.17);
+                int height_Cut = Convert.ToInt16(image.Height*0.73);//0.82
+
+                // 🔲 تحديد الجزء المطلوب قصه (مثال: من الإحداثي 250,80 بحجم 600-400)
+                var cropRectangle = new Rectangle(x: width_ignore, y: height_ignore, width: width_Cut, height: height_Cut);
+                //var cropRectangle = new Rectangle(x: 250, y: 80, width: 600, height: 400);
+
+                // التحقق أن الأبعاد داخل حدود الصورة الأصلية
+                cropRectangle.Intersect(new Rectangle(0, 0, image.Width, image.Height));
+
+                // 🪚 قص الجزء المحدد + تحويل إلى رمادي
+                image.Mutate(x => x
+                    .Crop(cropRectangle)
+                    .Grayscale()
+                    .Contrast(1.2f)      // رفع التباين
+                    .Brightness(1.1f)   // رفع الإضاءة قليلاً
+                );
+
                 await image.SaveAsync(savePath); // تلقائيًا يحدد التنسيق حسب الامتداد
 
                 Console.WriteLine("النص المستخرج:");
