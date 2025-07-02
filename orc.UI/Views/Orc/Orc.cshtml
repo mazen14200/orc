@@ -41,6 +41,15 @@
             </div>
 
             <div class="mb-3">
+                <label for="lang" class="form-label">Select Document Language: </label>
+                <br />
+                <label for="ar" class="form-label"> Arabic </label>
+                <input type="radio" name="lang" id="ar" value="ar" required>
+                <label for="en" class="form-label"> En </label>
+                <input type="radio" name="lang" id="en" value="en" required>
+            </div>
+
+            <div class="mb-3">
                 <label for="file" class="form-label">Upload File (PDF or Image)</label>
                 <input type="file" name="File" class="form-control" id="file" onchange="validateFileInput(this)" required>
                 <div id="fileError" class="text-danger mt-1"></div>
