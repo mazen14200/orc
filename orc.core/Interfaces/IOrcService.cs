@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,7 +15,7 @@ namespace orc.core.Interfaces
         public Task<bool> CheckIfDataNumbers(string text_withoutSpaces);
         public Task<bool> CheckIfNationalNumber(string text_withoutSpaces);
         public Task<string> FixArabicText(string input);
-
+        //public Task<List<Bitmap>> ConvertPdfToImages(string pdfPath);
 
     }
 }

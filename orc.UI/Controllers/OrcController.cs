@@ -10,7 +10,6 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
-//using System.Drawing;
 using Tesseract;
 using static System.Net.Mime.MediaTypeNames;
 using SixLabors.ImageSharp.Formats.Png;
@@ -83,11 +82,6 @@ namespace orc.UI.Controllers
 
                 using var image = await Image.LoadAsync(file.OpenReadStream());
 
-                //// تحويل إلى تدرج الرمادي
-                //image.Mutate(x => x.Grayscale());
-
-                //// حفظ الصورة بصيغة PNG أو JPEG حسب الامتداد
-                //await image.SaveAsync(savePath); // تلقائيًا يحدد التنسيق حسب الامتداد
 
                 // الحصول على الأبعاد
                 int width_ignore = Convert.ToInt16(image.Width*0.31);
@@ -95,9 +89,9 @@ namespace orc.UI.Controllers
                 int height_ignore = Convert.ToInt16(image.Height*0.17);
                 int height_Cut = Convert.ToInt16(image.Height*0.73);//0.82
 
-                // 🔲 تحديد الجزء المطلوب قصه (مثال: من الإحداثي 250,80 بحجم 600-400)
+                // شرح والمثال في الاسفل 🔲 تحديد الجزء المطلوب قصه (مثال: من الإحداثي 250,80 بحجم 600-400)
                 var cropRectangle = new Rectangle(x: width_ignore, y: height_ignore, width: width_Cut, height: height_Cut);
-                //var cropRectangle = new Rectangle(x: 250, y: 80, width: 600, height: 400);
+                // for example var cropRectangle = new Rectangle(x: 250, y: 80, width: 600, height: 400);
 
                 // التحقق أن الأبعاد داخل حدود الصورة الأصلية
                 cropRectangle.Intersect(new Rectangle(0, 0, image.Width, image.Height));
@@ -114,7 +108,7 @@ namespace orc.UI.Controllers
 
                 Console.WriteLine("النص المستخرج:");
 
-                //string imagePath = "D:\\mazen\\orc\\orc.UI\\wwwroot\\uploads\\ITFdiag1.png"; // مسار الصورة
+                //مثال string imagePath = "D:\\mazen\\orc\\orc.UI\\wwwroot\\uploads\\ITFdiag1.png"; // مسار الصورة
                 string imagePath = savePath;
                 string tessDataPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "tessdata");
                 string extractedText = "";
@@ -134,8 +128,7 @@ namespace orc.UI.Controllers
                 var structuredData = ParseOcrText(extractedText);
 
                 return View("Result", structuredData);
-                //string text_withoutSpaces = extractedText.Replace(" ", "").Replace("\n", "").Replace("\t", "");
-                //string text_withoutSpaces = Regex.Replace(extractedText, @"[^\d٠-٩]", "");
+
                 string text_withoutSpaces = extractedText;
 
                 bool isValid = false;
@@ -212,8 +205,6 @@ namespace orc.UI.Controllers
             }
             else
             {
-                //Console.WriteLine("No, it's Not a National Number");
-                //ViewBag.Message = "No, it's Not a National Number!";
                 nationalIdData.message = "The Number which you Entered is Wrong";
                 return View("Result", nationalIdData);
 

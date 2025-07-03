@@ -3,6 +3,8 @@ using orc.core.Models;
 using System.Text;
 using System.Text.RegularExpressions;
 using Tesseract;
+using PdfiumViewer; // تحويل ال pdf to images
+using System.Drawing;
 
 namespace orc.Services.Services
 {
@@ -40,11 +42,7 @@ namespace orc.Services.Services
         }
         public async Task<string> ExtractTextFromImage_AsAr(string imagePath, string tessDataPath)
         {
-            //using var engine = new TesseractEngine(tessDataPath, "ara+eng", EngineMode.Default);
-            //engine.SetVariable("tessedit_char_whitelist", "0123456789٠١٢٣٤٥٦٧٨٩");
-
             using var engine = new TesseractEngine(tessDataPath, "ara", EngineMode.Default);
-            //engine.SetVariable("tessedit_char_whitelist", "٠١٢٣٤٥٦٧٨٩");
             using var img = Pix.LoadFromFile(imagePath);
             using var page = engine.Process(img);
             return page.GetText();
@@ -114,5 +112,6 @@ namespace orc.Services.Services
 
             return string.Join("\n", fixedLines);
         }
+
     }
 }
