@@ -19,9 +19,13 @@
 
 
 ## third Moduel
-*extracted text data from (pdf_is_imges) as english and arabic text using lipraries* ```PdfiumViewer -- Tesseract```
-### PdfiumViewer
+*extracted text data from (pdf_is_imges) as english and arabic text using lipraries* ```PdfiumViewer -- PdfiumViewer.Native.x86_64.v -- Tesseract```
+### PdfiumViewer +AND+ PdfiumViewer.Native.x86_64.v
 *used for convert (pdf_is_img) file to (images files)*
+#### could you get this following Error 
+*System.DllNotFoundException: 'Unable to load DLL 'pdfium.dll' or one of its dependencies: The specified module could not be found. (0x8007007E)'*
+**solving by downloading this package also after the other ```PdfiumViewer.Native.x86_64.v``` **
+
 ### Tesseract
 *used for get data from images as arabic and english*
 **first download language files as ara.traineddata -- eng.traineddata  **

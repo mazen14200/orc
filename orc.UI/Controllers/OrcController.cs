@@ -1,20 +1,21 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis;
 using orc.core.Interfaces;
 using orc.core.Models;
 using orc.UI.DTO;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Png;
+using SixLabors.ImageSharp.Processing;
 using System;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Processing;
 using Tesseract;
-using static System.Net.Mime.MediaTypeNames;
-using SixLabors.ImageSharp.Formats.Png;
-using Image = SixLabors.ImageSharp.Image; // أو .Jpeg حسب التنسيق
 using UglyToad.PdfPig;
+using static System.Net.Mime.MediaTypeNames;
+using Image = SixLabors.ImageSharp.Image; // أو .Jpeg حسب التنسيق
 
 
 namespace orc.UI.Controllers
@@ -25,11 +26,13 @@ namespace orc.UI.Controllers
     {
         private readonly IBaseRepository<National> _nationalTable;
         private readonly IOrcService _orc;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public OrcController(IBaseRepository<National> nationalTable, IOrcService orc)
+        public OrcController(IBaseRepository<National> nationalTable, IOrcService orc, IWebHostEnvironment webHostEnvironment)
         {
             _nationalTable = nationalTable;
             _orc = orc;
+            _webHostEnvironment = webHostEnvironment;
         }
         [HttpGet("Orc")]
         public IActionResult Orc()
@@ -44,32 +47,109 @@ namespace orc.UI.Controllers
                 ViewBag.TextValue_View = "من فضلك اكمل البيانات";
                 return View();
             }
+
+            string tessDataPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "tessdata");
+
             if (file != null && file.Length > 0)
             {
                 if (file.ContentType.ToLower().Contains("pdf")) {
-                    string pdfPath = "D:\\mazen\\word\\tasks/1.pdf"; // أو مسار آخر
+                    //string pdfPath = "D:\\mazen\\word\\tasks/1.pdf"; // أو مسار آخر
+                    //string filepath = "D:\\mazen\\word\\tasks/Doc2_Imges.pdf"; // أو مسار آخر
+                    //string pdf_images_Path = "D:\\mazen\\word\\tasks/Doc2_Imges.pdf"; // أو مسار آخر
+                    var wwwRoot = _webHostEnvironment.WebRootPath;
+                    string pdfPath = " ";
+                    string pdf_images_Path = " ";
                     string pagedata = $" ";
-                    using (PdfDocument document = PdfDocument.Open(pdfPath))
+                    string pagedataWithoutSpaces = " ";
+                    try
                     {
-                        foreach (var page in document.GetPages())
-                        {
-                            string text = page.Text;
-                            Console.OutputEncoding = System.Text.Encoding.UTF8; // لدعم العربية
+                        //var filepath = Path.GetFileName(file.FileName);
+                        var uploadsFolder_path = Path.Combine("wwwroot", "uploads");
+                        pdfPath = await _orc.SavePdfToWwwRoot(file , uploadsFolder_path);
 
-                            Console.WriteLine($"P{page.Number}:\n{text}\n");
-                            pagedata = pagedata + $"P{page.Number}:\n{text}\n";
+
+                        using (PdfDocument document = PdfDocument.Open(pdfPath))
+                        {
+                            foreach (var page in document.GetPages())
+                            {
+                                // pdf of text
+                                string text = page.Text;
+                                Console.OutputEncoding = System.Text.Encoding.UTF8; // لدعم العربية
+
+                                Console.WriteLine($"P{page.Number}:\n{text}\n");
+                                pagedata = pagedata + $"P{page.Number}:\n{text}\n";
+                                
+                                // this is pdf of text
+                                if (lang == "ar")
+                                {
+                                    string Arab_True = await _orc.FixArabicText(pagedata);
+                                    ViewBag.Message = Arab_True;
+                                }
+                                else
+                                {
+                                    ViewBag.Message = pagedata;
+                                }
+                                
+                             }
+                        }
+                        pagedataWithoutSpaces = Regex.Replace(pagedata, "[0-9]", "");
+                        pagedataWithoutSpaces = pagedataWithoutSpaces.Replace(" ", "").Replace("\n", "").Replace("P", "").Replace(":", "");
+                        if (pagedataWithoutSpaces.Length < 5)
+                        {
+                            // this is pdf of images
+                            pdf_images_Path = pdfPath;
+                            var imagesBitmap = await _orc.ConvertPdfToImages(pdf_images_Path);
+                            if (lang == "ar")
+                            {
+                                string arab_text = " ";
+                                foreach (var singleBitmap in imagesBitmap)
+                                {
+                                    arab_text = arab_text + await _orc.ExtractTextFromImageBitMap_AsArabic(singleBitmap, tessDataPath);
+                                }
+                                ViewBag.Message = arab_text;
+                            }
+                            else
+                            {
+                                string eng_text = " ";
+                                foreach (var singleBitmap in imagesBitmap)
+                                {
+                                    eng_text = eng_text + await _orc.ExtractTextFromImageBitMap_AsEn(singleBitmap, tessDataPath);
+                                }
+                                ViewBag.Message = eng_text;
+                            }
 
                         }
                     }
-                    if (lang == "ar")
+                    catch (Exception ex)
                     {
-                        string Arab_True = await _orc.FixArabicText(pagedata);
-                        ViewBag.Message = Arab_True;
+                        if (pagedataWithoutSpaces.Length < 5)
+                        {
+                            pdf_images_Path = pdfPath;
+                            // this is pdf of images
+                            var imagesBitmap = await _orc.ConvertPdfToImages(pdf_images_Path);
+                            if (lang == "ar")
+                            {
+                                string arab_text = " ";
+                                foreach (var singleBitmap in imagesBitmap)
+                                {
+                                    arab_text = arab_text + await _orc.ExtractTextFromImageBitMap_AsArabic(singleBitmap, tessDataPath);
+                                }
+                                string Arab_True = await _orc.FixArabicText(arab_text);
+                                ViewBag.Message = Arab_True;
+                            }
+                            else
+                            {
+                                string eng_text = " ";
+                                foreach (var singleBitmap in imagesBitmap)
+                                {
+                                    eng_text = eng_text + await _orc.ExtractTextFromImageBitMap_AsEn(singleBitmap, tessDataPath);
+                                }
+                                ViewBag.Message = eng_text;
+                            }
+
+                        }
                     }
-                    else
-                    {
-                        ViewBag.Message = pagedata;
-                    }
+
                     return View();
                 }
                 var uploadsFolder = Path.Combine("wwwroot", "uploads");
@@ -110,7 +190,6 @@ namespace orc.UI.Controllers
 
                 //مثال string imagePath = "D:\\mazen\\orc\\orc.UI\\wwwroot\\uploads\\ITFdiag1.png"; // مسار الصورة
                 string imagePath = savePath;
-                string tessDataPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "tessdata");
                 string extractedText = "";
                 if(lang == "ar")
                 {

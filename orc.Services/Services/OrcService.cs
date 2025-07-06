@@ -1,10 +1,13 @@
 ﻿using orc.core.Interfaces;
 using orc.core.Models;
+using PdfiumViewer; // تحويل ال pdf to images
+using System;
+using System.Drawing;
 using System.Text;
 using System.Text.RegularExpressions;
 using Tesseract;
-using PdfiumViewer; // تحويل ال pdf to images
-using System.Drawing;
+using System.IO;
+using Microsoft.AspNetCore.Http;
 
 namespace orc.Services.Services
 {
@@ -113,5 +116,79 @@ namespace orc.Services.Services
             return string.Join("\n", fixedLines);
         }
 
-    }
+
+
+        public async Task<List<Bitmap>> ConvertPdfToImages(string pdfPath)
+        {
+            var images = new List<Bitmap>();
+            using (var document = PdfDocument.Load(pdfPath))
+            {
+                for (int page = 0; page < document.PageCount; page++)
+                {
+                    var image = document.Render(page, 300, 300, true); // دقة عالية
+                    images.Add((Bitmap)image);
+                }
+            }
+            return images;
+        }
+
+        public async Task<string> ExtractTextFromImageBitMap_AsEn(Bitmap image, string tessDataPath)
+        {
+            using (var engine = new TesseractEngine(tessDataPath, "eng", EngineMode.Default))
+            {
+                using (var pix = PixConverter.ToPix(image))
+                {
+                    using (var page = engine.Process(pix))
+                    {
+                        return page.GetText();
+                    }
+                }
+            }
+        }
+        public async Task<string> ExtractTextFromImageBitMap_AsArabic(Bitmap image, string tessDataPath)
+        {
+            using (var engine = new TesseractEngine(tessDataPath, "ara", EngineMode.Default))
+            {
+                using (var pix = PixConverter.ToPix(image))
+                {
+                    using (var page = engine.Process(pix))
+                    {
+                        return page.GetText();
+                    }
+                }
+            }
+        }
+
+        public async Task<string> SavePdfToWwwRoot(IFormFile sourceFile, string wwwRootPath)
+        {
+            // تأكد إن الملف موجود
+            if (sourceFile==null || sourceFile.Length<1)
+                throw new FileNotFoundException("Source PDF not found.");
+            string folderName = "pdfs";
+            // إنشاء فولدر pdfs لو مش موجود داخل wwwroot
+            string targetFolder = Path.Combine(wwwRootPath, folderName);
+            if (!Directory.Exists(targetFolder))
+                Directory.CreateDirectory(targetFolder);
+
+            //// عمل اسم جديد للملف (مثلا باستخدام Guid لتجنب التكرار)
+            //string newFileName = $"{Guid.NewGuid()}.pdf";
+            string newFileName = sourceFile.FileName;
+
+            // تحديد المسار الكامل للنسخة الجديدة
+            string targetPath = Path.Combine(targetFolder, newFileName);
+
+            // حفظ الملف
+            using (var stream = new FileStream(targetPath, FileMode.Create))
+            {
+                await sourceFile.CopyToAsync(stream);
+            }
+
+            // إنشاء path relative عشان تقدر تستخدمه فى الروابط
+            string relativePath = Path.Combine("/", folderName, newFileName).Replace("\\", "/");
+
+            return targetPath;
+        }
+
+
+}
 }
